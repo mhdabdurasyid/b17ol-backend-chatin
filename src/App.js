@@ -6,6 +6,12 @@ const cors = require('cors')
 // import public route
 const authRoute = require('../src/routes/auth')
 
+// import private route
+const usersRoute = require('../src/routes/users')
+
+// import middleware
+const authMidlleware = require('../src/middlewares/auth')
+
 const app = express()
 const { APP_PORT } = process.env
 
@@ -18,6 +24,9 @@ app.use('/uploads', express.static('assets/uploads'))
 
 // define public route
 app.use('/auth', authRoute)
+
+// define private route
+app.use('/users', authMidlleware, usersRoute)
 
 // listening on port 8080
 app.listen(APP_PORT, () => {
