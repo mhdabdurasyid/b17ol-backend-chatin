@@ -2,8 +2,10 @@ const responseStandard = require('../helpers/responses')
 const upload = require('../helpers/upload')
 const bcrypt = require('bcryptjs')
 const Joi = require('joi')
+const jwt = require('jsonwebtoken')
 
 const { Users } = require('../models')
+const { APP_KEY } = process.env
 
 module.exports = {
   register: async (req, res) => {
@@ -112,6 +114,38 @@ module.exports = {
         return responseStandard(res, 'Reset password successfully!', {})
       } else {
         return responseStandard(res, 'Reset password failed!', {}, 400, false)
+      }
+    }
+  },
+  loginByEmail: async (req, res) => {
+    const schema = Joi.object({
+      email: Joi.string().email().max(50).required(),
+      password: Joi.string().min(6).max(20).required()
+    })
+
+    const { error, value } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { email, password } = value
+
+      const isEmailValid = await Users.findAll({
+        where: { email: email }
+      })
+
+      if (isEmailValid.length) {
+        const isPasswordMatch = bcrypt.compareSync(password, isEmailValid[0].dataValues.password)
+
+        if (isPasswordMatch) {
+          jwt.sign({ id: isEmailValid[0].dataValues.id }, APP_KEY, { expiresIn: '7d' }, (_error, token) => {
+            return responseStandard(res, 'Login success!', { token })
+          })
+        } else {
+          return responseStandard(res, 'Wrong password!', {}, 404, false)
+        }
+      } else {
+        return responseStandard(res, 'Email not found!', {}, 404, false)
       }
     }
   }
