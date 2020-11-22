@@ -12,5 +12,15 @@ module.exports = {
     } else {
       return responseStandard(res, 'User not found!', {}, 404, false)
     }
+  },
+  getUserDetailById: async (req, res) => {
+    const { id } = req.params
+    const user = await Users.findByPk(id)
+
+    if (user) {
+      return responseStandard(res, 'Found an user!', { result: user })
+    } else {
+      return responseStandard(res, 'User not found!', {}, 404, false)
+    }
   }
 }
