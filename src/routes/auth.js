@@ -8,5 +8,6 @@ route.post('/isPhoneRegister', authController.isPhoneRegister)
 route.post('/isEmailValid', authController.isEmailValid)
 route.post('/resetPassword/:id', authController.resetPassword)
 route.post('/loginByEmail', authController.loginByEmail)
+route.post('/loginByPhone', authController.loginByPhone)
 
 module.exports = route

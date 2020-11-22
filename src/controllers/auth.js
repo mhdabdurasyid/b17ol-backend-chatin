@@ -148,5 +148,37 @@ module.exports = {
         return responseStandard(res, 'Email not found!', {}, 404, false)
       }
     }
+  },
+  loginByPhone: async (req, res) => {
+    const schema = Joi.object({
+      phoneNumber: Joi.string().min(10).max(12).required(),
+      password: Joi.string().min(6).max(20).required()
+    })
+
+    const { error, value } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { phoneNumber, password } = value
+
+      const isPhoneValid = await Users.findAll({
+        where: { phone_number: phoneNumber }
+      })
+
+      if (isPhoneValid.length) {
+        const isPasswordMatch = bcrypt.compareSync(password, isPhoneValid[0].dataValues.password)
+
+        if (isPasswordMatch) {
+          jwt.sign({ id: isPhoneValid[0].dataValues.id }, APP_KEY, { expiresIn: '7d' }, (_error, token) => {
+            return responseStandard(res, 'Login success!', { token })
+          })
+        } else {
+          return responseStandard(res, 'Wrong password!', {}, 404, false)
+        }
+      } else {
+        return responseStandard(res, 'Phone number not found!', {}, 404, false)
+      }
+    }
   }
 }
