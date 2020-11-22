@@ -38,9 +38,32 @@ module.exports = {
           }
 
           const result = await Users.create(data)
-          return responseStandard(res, 'Create user successfully', { result: result })
+          return responseStandard(res, 'Register user successfully', { result: result })
         }
       }
     })
+  },
+  isPhoneRegister: async (req, res) => {
+    const schema = Joi.object({
+      phoneNumber: Joi.string().min(10).max(12).required()
+    })
+
+    const { error, value } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { phoneNumber } = value
+      const user = await Users.findOne({
+        attributes: ['id', 'phone_number'],
+        where: { phone_number: phoneNumber }
+      })
+
+      if (user) {
+        return responseStandard(res, 'Found an phone number!', { result: user })
+      } else {
+        return responseStandard(res, 'Phone number not found!', {}, 404, false)
+      }
+    }
   }
 }
