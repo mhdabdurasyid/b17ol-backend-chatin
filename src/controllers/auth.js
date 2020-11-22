@@ -60,7 +60,7 @@ module.exports = {
       })
 
       if (user) {
-        return responseStandard(res, 'Found an phone number!', { result: user })
+        return responseStandard(res, 'Found a phone number!', { result: user })
       } else {
         return responseStandard(res, 'Phone number not found!', {}, 404, false)
       }
@@ -86,6 +86,32 @@ module.exports = {
         return responseStandard(res, 'Found an email!', { result: user })
       } else {
         return responseStandard(res, 'Email not found!', {}, 404, false)
+      }
+    }
+  },
+  resetPassword: async (req, res) => {
+    const { id } = req.params
+
+    const schema = Joi.object({
+      newPassword: Joi.string().min(6).max(20).required(),
+      confirmPassword: Joi.ref('newPassword')
+    })
+
+    const { error, value } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { newPassword } = value
+      const salt = bcrypt.genSaltSync(10)
+      const hashedPassword = bcrypt.hashSync(newPassword, salt)
+
+      const isReset = await Users.update({ password: hashedPassword }, { where: { id } })
+
+      if (isReset[0] === 1) {
+        return responseStandard(res, 'Reset password successfully!', {})
+      } else {
+        return responseStandard(res, 'Reset password failed!', {}, 400, false)
       }
     }
   }
