@@ -22,8 +22,36 @@ module.exports = {
       const data = {
         message,
         sender_id: id,
-        receiver_id: receiverId
+        receiver_id: receiverId,
+        isLatest: true
       }
+
+      await Messages.update({ isLatest: false }, {
+        where: {
+          [Op.and]: [
+            {
+              [Op.or]: [
+                {
+                  sender_id: id
+                },
+                {
+                  receiver_id: id
+                }
+              ]
+            },
+            {
+              [Op.or]: [
+                {
+                  sender_id: receiverId
+                },
+                {
+                  receiver_id: receiverId
+                }
+              ]
+            }
+          ]
+        }
+      })
 
       const result = await Messages.create(data)
       return responseStandard(res, 'Create message successfully', { result: result })
