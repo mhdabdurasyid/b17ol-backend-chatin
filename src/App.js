@@ -8,6 +8,7 @@ const authRoute = require('../src/routes/auth')
 
 // import private route
 const usersRoute = require('../src/routes/users')
+const messageRoute = require('../src/routes/message')
 
 // import middleware
 const authMidlleware = require('../src/middlewares/auth')
@@ -27,6 +28,7 @@ app.use('/auth', authRoute)
 
 // define private route
 app.use('/users', authMidlleware, usersRoute)
+app.use('/message', authMidlleware, messageRoute)
 
 // listening on port 8080
 app.listen(APP_PORT, () => {
