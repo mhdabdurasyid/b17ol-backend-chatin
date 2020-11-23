@@ -66,5 +66,42 @@ module.exports = {
     } else {
       return responseStandard(res, 'Message not found!', {}, 404, false)
     }
+  },
+  deleteMessage: async (req, res) => {
+    const { id } = req.user
+    const { friendId } = req.params
+
+    const isDeleted = await Messages.destroy({
+      where: {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              {
+                sender_id: id
+              },
+              {
+                receiver_id: id
+              }
+            ]
+          },
+          {
+            [Op.or]: [
+              {
+                sender_id: friendId
+              },
+              {
+                receiver_id: friendId
+              }
+            ]
+          }
+        ]
+      }
+    })
+
+    if (isDeleted === 1) {
+      return responseStandard(res, 'Delete message successfully!', {})
+    } else {
+      return responseStandard(res, 'Delete message failed!', {}, 400, false)
+    }
   }
 }
