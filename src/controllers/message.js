@@ -35,20 +35,26 @@ module.exports = {
 
     const message = await Messages.findAll({
       where: {
-        [Op.or]: [
+        [Op.and]: [
           {
-            sender_id: id
+            [Op.or]: [
+              {
+                sender_id: id
+              },
+              {
+                receiver_id: id
+              }
+            ]
           },
           {
-            receiver_id: id
-          }
-        ],
-        [Op.or]: [
-          {
-            sender_id: friendId
-          },
-          {
-            receiver_id: friendId
+            [Op.or]: [
+              {
+                sender_id: friendId
+              },
+              {
+                receiver_id: friendId
+              }
+            ]
           }
         ]
       }
