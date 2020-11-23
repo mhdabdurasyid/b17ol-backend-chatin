@@ -1,5 +1,6 @@
 const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
+const bcrypt = require('bcryptjs')
 
 const { Users } = require('../models')
 
@@ -41,6 +42,31 @@ module.exports = {
         return responseStandard(res, 'Found users!', { result: user })
       } else {
         return responseStandard(res, 'User not found!', {}, 404, false)
+      }
+    }
+  },
+  updatePassword: async (req, res) => {
+    const { id } = req.user
+    const schema = Joi.object({
+      newPassword: Joi.string().min(6).max(20).required(),
+      confirmPassword: Joi.ref('newPassword')
+    })
+
+    const { error, value } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { newPassword } = value
+      const salt = bcrypt.genSaltSync(10)
+      const hashedPassword = bcrypt.hashSync(newPassword, salt)
+
+      const isUpdate = await Users.update({ password: hashedPassword }, { where: { id } })
+
+      if (isUpdate[0] === 1) {
+        return responseStandard(res, 'Update password successfully!', {})
+      } else {
+        return responseStandard(res, 'Update password failed!', {}, 400, false)
       }
     }
   }
