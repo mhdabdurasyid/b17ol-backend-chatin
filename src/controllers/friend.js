@@ -1,5 +1,6 @@
 const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
+const { Op } = require('sequelize')
 
 const { Friends, Users } = require('../models')
 
@@ -48,13 +49,21 @@ module.exports = {
   },
   getFriendList: async (req, res) => {
     const { id } = req.user
+    let { search } = req.query
+
+    if (!search) {
+      search = ''
+    }
 
     const friend = await Friends.findAll({
       include: {
         model: Users,
         as: 'contact',
         attributes: ['name', 'photo'],
-        required: true
+        required: true,
+        where: {
+          name: { [Op.substring]: search }
+        }
       },
       where: {
         id
@@ -65,7 +74,7 @@ module.exports = {
     })
 
     if (friend.length) {
-      return responseStandard(res, 'Found riend list!', { result: friend })
+      return responseStandard(res, 'Found friend list!', { result: friend })
     } else {
       return responseStandard(res, 'Friend list not found!', {}, 404, false)
     }
