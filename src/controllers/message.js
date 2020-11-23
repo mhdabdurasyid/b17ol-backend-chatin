@@ -1,7 +1,8 @@
 const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
+const { Op } = require('sequelize')
 
-const { Messages } = require('../models')
+const { Messages, Users } = require('../models')
 
 module.exports = {
   createMessage: async (req, res) => {
@@ -26,6 +27,38 @@ module.exports = {
 
       const result = await Messages.create(data)
       return responseStandard(res, 'Create message successfully', { result: result })
+    }
+  },
+  getMessageDetail: async (req, res) => {
+    const { id } = req.user
+    const { friendId } = req.params
+
+    const message = await Messages.findAll({
+      where: {
+        [Op.or]: [
+          {
+            sender_id: id
+          },
+          {
+            receiver_id: id
+          }
+        ],
+        [Op.or]: [
+          {
+            sender_id: friendId
+          },
+          {
+            receiver_id: friendId
+          }
+        ]
+      }
+    })
+
+    if (message.length) {
+      const user = await Users.findByPk(friendId, { attributes: ['id', 'name'] })
+      return responseStandard(res, 'Found message detail!', { result: { friend: user, message } })
+    } else {
+      return responseStandard(res, 'Message not found!', {}, 404, false)
     }
   }
 }
