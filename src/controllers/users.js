@@ -1,6 +1,7 @@
 const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
 const bcrypt = require('bcryptjs')
+const upload = require('../helpers/upload')
 
 const { Users } = require('../models')
 
@@ -69,5 +70,46 @@ module.exports = {
         return responseStandard(res, 'Update password failed!', {}, 400, false)
       }
     }
+  },
+  updateProfile: async (req, res) => {
+    const { id } = req.user
+    const uploadImage = upload.single('image')
+
+    const schema = Joi.object({
+      phoneNumber: Joi.string().min(10).max(12),
+      email: Joi.string().email().max(50),
+      name: Joi.string().max(20),
+      status: Joi.string().max(500),
+      userId: Joi.string().max(20)
+    })
+
+    uploadImage(req, res, async (err) => {
+      if (err) {
+        return responseStandard(res, err.message, {}, 400, false)
+      } else {
+        const image = req.file
+        const { error, value } = schema.validate(req.body)
+        const { phoneNumber, email, name, status, userId } = value
+
+        if (error) {
+          return responseStandard(res, error.message, {}, 400, false)
+        } else {
+          await Users.update({
+            phone_number: phoneNumber,
+            email,
+            name,
+            status,
+            user_id: userId,
+            photo: image && `/uploads/${image.filename}`
+          }, {
+            where: {
+              id
+            }
+          })
+
+          return responseStandard(res, 'Update profile successfully!', {})
+        }
+      }
+    })
   }
 }
