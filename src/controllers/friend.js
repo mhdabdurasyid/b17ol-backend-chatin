@@ -28,5 +28,22 @@ module.exports = {
         return responseStandard(res, 'Friend already exist', {}, 500, false)
       }
     }
+  },
+  deleteFriend: async (req, res) => {
+    const { id } = req.user
+    const { friendId } = req.params
+
+    const isDeleted = await Friends.destroy({
+      where: {
+        id,
+        friend: friendId
+      }
+    })
+
+    if (isDeleted > 0) {
+      return responseStandard(res, 'Delete friend successfully!', {})
+    } else {
+      return responseStandard(res, 'Delete message failed!', {}, 400, false)
+    }
   }
 }
