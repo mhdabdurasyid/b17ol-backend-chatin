@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       message: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(1000)
       },
       sender_id: {
         type: Sequelize.INTEGER,
