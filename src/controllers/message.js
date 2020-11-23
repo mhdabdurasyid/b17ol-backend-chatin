@@ -2,7 +2,7 @@ const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
 const { Op } = require('sequelize')
 
-const { Messages, Users } = require('../models')
+const { Messages, Users, sequelize } = require('../models')
 
 module.exports = {
   createMessage: async (req, res) => {
@@ -130,6 +130,53 @@ module.exports = {
       return responseStandard(res, 'Delete message successfully!', {})
     } else {
       return responseStandard(res, 'Delete message failed!', {}, 400, false)
+    }
+  },
+  getMessageList: async (req, res) => {
+    const { id } = req.user
+
+    const message = await Messages.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal('(SELECT name from users WHERE users.id = messages.sender_id)'),
+            'sender_name'
+          ],
+          [
+            sequelize.literal('(SELECT photo from users WHERE users.id = messages.sender_id)'),
+            'sender_photo'
+          ],
+          [
+            sequelize.literal('(SELECT name from users WHERE users.id = messages.receiver_id)'),
+            'receiver_name'
+          ],
+          [
+            sequelize.literal('(SELECT photo from users WHERE users.id = messages.receiver_id)'),
+            'receiver_photo'
+          ]
+        ]
+      },
+      where: {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              {
+                sender_id: id
+              },
+              {
+                receiver_id: id
+              }
+            ]
+          },
+          { isLatest: true }
+        ]
+      }
+    })
+
+    if (message.length) {
+      return responseStandard(res, 'Found message list!', { result: message })
+    } else {
+      return responseStandard(res, 'Message list not found!', {}, 404, false)
     }
   }
 }
