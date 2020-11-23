@@ -98,7 +98,7 @@ module.exports = {
       }
     })
 
-    if (isDeleted === 1) {
+    if (isDeleted > 0) {
       return responseStandard(res, 'Delete message successfully!', {})
     } else {
       return responseStandard(res, 'Delete message failed!', {}, 400, false)
