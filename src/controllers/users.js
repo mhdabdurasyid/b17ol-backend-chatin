@@ -1,6 +1,7 @@
 const responseStandard = require('../helpers/responses')
 const Joi = require('joi')
 const bcrypt = require('bcryptjs')
+const { Op } = require('sequelize')
 const upload = require('../helpers/upload')
 
 const { Users } = require('../models')
@@ -37,7 +38,7 @@ module.exports = {
       return responseStandard(res, error.message, {}, 400, false)
     } else {
       const { userId } = value
-      const user = await Users.findAll({ where: { user_id: userId } })
+      const user = await Users.findAll({ where: { user_id: { [Op.substring]: userId } } })
 
       if (user.length) {
         return responseStandard(res, 'Found users!', { result: user })
