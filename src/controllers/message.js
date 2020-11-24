@@ -170,7 +170,10 @@ module.exports = {
           },
           { isLatest: true }
         ]
-      }
+      },
+      order: [
+        ['createdAt', 'DESC']
+      ]
     })
 
     if (message.length) {
