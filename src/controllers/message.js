@@ -85,7 +85,10 @@ module.exports = {
             ]
           }
         ]
-      }
+      },
+      order: [
+        ['createdAt', 'DESC']
+      ]
     })
 
     if (message.length) {
