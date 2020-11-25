@@ -59,7 +59,7 @@ module.exports = {
       include: {
         model: Users,
         as: 'contact',
-        attributes: ['name', 'photo'],
+        attributes: ['name', 'photo', 'status'],
         required: true,
         where: {
           name: { [Op.substring]: search }
