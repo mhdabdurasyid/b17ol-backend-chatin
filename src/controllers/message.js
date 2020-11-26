@@ -1,4 +1,5 @@
 const responseStandard = require('../helpers/responses')
+const socket = require('../helpers/socket')
 const Joi = require('joi')
 const { Op } = require('sequelize')
 const qs = require('querystring')
@@ -56,6 +57,7 @@ module.exports = {
       })
 
       const result = await Messages.create(data)
+      socket.io.emit(receiverId.toString(), { senderId: id, message })
       return responseStandard(res, 'Create message successfully', { result: result })
     }
   },

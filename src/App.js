@@ -17,6 +17,14 @@ const authMidlleware = require('../src/middlewares/auth')
 const app = express()
 const { APP_PORT } = process.env
 
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {})
+const data = require('./helpers/socket')
+data.io = io
+io.on('connection', () => {
+  console.log('An user connected to our socket')
+})
+
 // enable CORS
 app.use(cors())
 
@@ -33,6 +41,6 @@ app.use('/message', authMidlleware, messageRoute)
 app.use('/friend', authMidlleware, friendRoute)
 
 // listening on port 8080
-app.listen(APP_PORT, () => {
+server.listen(APP_PORT, () => {
   console.log(`App listening on port ${APP_PORT}`)
 })
